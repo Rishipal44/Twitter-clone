@@ -1,11 +1,12 @@
 import Notification from "../models/notification.model.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const createPost = async (req, res) => {
     try{
         const { text } = req.body;
-        const { img } = req.body;
+        let { img } = req.body;
         const userId = req.user._id.toString();
 
         const user = await User.findById(userId);
