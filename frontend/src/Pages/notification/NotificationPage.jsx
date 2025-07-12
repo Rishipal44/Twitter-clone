@@ -5,33 +5,59 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import LoadingSpinner from "../../Components/common/LoaddingSpinner.jsx";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { useEffect } from "react";
 
 const NotificationPage = () => {
-	const isLoading = false;
-	const notifications = [
-		{
-			_id: "1",
-			from: {
-				_id: "1",
-				username: "johndoe",
-				profileImg: "/avatars/boy2.png",
-			},
-			type: "follow",
-		},
-		{
-			_id: "2",
-			from: {
-				_id: "2",
-				username: "janedoe",
-				profileImg: "/avatars/girl1.png",
-			},
-			type: "like",
-		},
-	];
 
-	const deleteNotifications = () => {
-		alert("All notifications deleted");
-	};
+	const queryClient = useQueryClient();
+
+	const { data: notifications, isLoading } = useQuery({
+		queryKey: ["notifications"],
+		queryFn: async () => {
+			try{
+				const res = await fetch("/api/notifications");
+				const data = await res.json();
+
+				if(!res.ok){
+					throw new Error(data.error || "Somthing went wrong");
+				}
+				console.log(data);
+				return data;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+			
+		}
+	});
+
+	const { mutate: deleteNotifications } = useMutation({
+		mutationFn: async () => {
+			try{
+				const res = await fetch("/api/notifications",{
+					method: "DELETE",
+				});
+				const data = await res.json();
+
+				if(!res.ok){
+					throw new Error(data.error || "Somthing went wrong");
+				}
+
+				return data;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		},
+		onSuccess: (updatedNotificatons) => {
+			toast.success("notifications deleted successfully");
+			queryClient.invalidateQueries({ queryKey: ["notifications"] });
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		}
+	});
+
 
 	return (
 		<>
@@ -71,7 +97,7 @@ const NotificationPage = () => {
 								</div>
 								<div className='flex gap-1'>
 									<span className='font-bold'>@{notification.from.username}</span>{" "}
-									{notification.type === "follow" ? "followed you" : "liked your post"}
+									{ notification.type === "follow" ? "followed you" :(notification.type === "comment" ? "commented on your post" : "liked your post") }
 								</div>
 							</Link>
 						</div>

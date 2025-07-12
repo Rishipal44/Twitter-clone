@@ -82,13 +82,15 @@ export const commentOnPost = async (req, res) => {
         post.comments.push(comment);
         await post.save();
 
-        const notification = new Notification({
-            from: userId,
-            to: post.user,
-            type: "comment"
-        });
+        if(userId.toString() !== post.user.toString()){
+            const notification = new Notification({
+                from: userId,
+                to: post.user,
+                type: "comment"
+            });
 
-        await notification.save();
+            await notification.save();
+        }
 
         const updatedComments = post.comments;
         res.status(200).json(updatedComments);
@@ -122,13 +124,15 @@ export const likeUnlikePost = async (req, res) => {
             await User.updateOne({_id: userId}, {$push: {likedPosts: postId}});
             await post.save();
 
-            const notification = new Notification({
-                from: userId,
-                to: post.user,
-                type: "like",
-            });
+            if(userId.toString() !== post.user.toString()){
+                const notification = new Notification({
+                    from: userId,
+                    to: post.user,
+                    type: "like",
+                });
 
-            await notification.save();
+                await notification.save();
+            }
 
             const updatedLikes = post.likes;
             res.status(200).json(updatedLikes);
