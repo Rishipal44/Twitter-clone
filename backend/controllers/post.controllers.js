@@ -225,9 +225,7 @@ export const getUserPosts = async (req, res) => {
         const { username } = req.params;
 
         const user = await User.findOne({username});
-        if(!user){
-            return res.status(404).json({ error: "User not found"});
-        }
+        if(!user) return res.status(404).json({ error: "User not found"});
 
         const posts = await Post.find({ user: user._id})
         .sort({ createdAt: -1 })
@@ -240,7 +238,7 @@ export const getUserPosts = async (req, res) => {
             select: "-password",
         });
 
-        res.status(200).json({ posts });
+        res.status(200).json(posts);
 
     } catch (error) {
         console.log("Error in getUserPosts controller: ", error.message);

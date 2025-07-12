@@ -17,7 +17,6 @@ const RightPanel = () => {
 				if(!res.ok){
 					throw new Error(data.error || "Somthing went wrong");
 				}
-				console.log(data);
 				return data;
 			} catch (error) {
 				throw new Error(error.message);
